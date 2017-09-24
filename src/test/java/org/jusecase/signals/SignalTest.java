@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SignalTest {
 
-    Signal<ResizeListener> resizeSignal = new Signal<>();
+    Signal<ResizeListener> signal = new Signal<>();
 
     int calledListeners;
     int width;
@@ -29,8 +29,8 @@ public class SignalTest {
 
     @Test
     public void dispatch_listenerAddedAndRemoved() {
-        resizeSignal.add(listener);
-        resizeSignal.remove(listener);
+        signal.add(listener);
+        signal.remove(listener);
 
         whenSignalIsDispatched();
 
@@ -39,8 +39,8 @@ public class SignalTest {
 
     @Test
     public void dispatch_listenerRemovedDuringDispatchAtEnd() {
-        resizeSignal.add(listener);
-        resizeSignal.add((w, h) -> resizeSignal.remove(listener));
+        signal.add(listener);
+        signal.add((w, h) -> signal.remove(listener));
 
         whenSignalIsDispatched();
 
@@ -49,8 +49,8 @@ public class SignalTest {
 
     @Test
     public void dispatch_listenerRemovedDuringDispatchAtBegin() {
-        resizeSignal.add((w, h) -> resizeSignal.remove(listener));
-        resizeSignal.add(listener);
+        signal.add((w, h) -> signal.remove(listener));
+        signal.add(listener);
 
         whenSignalIsDispatched();
 
@@ -59,7 +59,7 @@ public class SignalTest {
 
     @Test
     public void dispatch_oneListener() {
-        resizeSignal.add(listener);
+        signal.add(listener);
 
         whenSignalIsDispatched(800, 600);
 
@@ -70,8 +70,8 @@ public class SignalTest {
 
     @Test
     public void dispatch_twoListeners() {
-        resizeSignal.add(listener);
-        resizeSignal.add(listener);
+        signal.add(listener);
+        signal.add(listener);
 
         whenSignalIsDispatched();
 
@@ -80,18 +80,26 @@ public class SignalTest {
 
     @Test
     public void removeAll() {
-        resizeSignal.add(listener);
-        resizeSignal.add(listener);
-        resizeSignal.add(listener);
-        resizeSignal.removeAll();
+        signal.add(listener);
+        signal.add(listener);
+        signal.add(listener);
+        signal.removeAll();
 
         whenSignalIsDispatched();
 
         assertThat(calledListeners).isEqualTo(0);
     }
 
+    @Test
+    public void nullListeners_doNotCauseException() {
+        signal.removeAll();
+        signal.remove(listener);
+
+        whenSignalIsDispatched();
+    }
+
     private void whenSignalIsDispatched(int width, int height) {
-        resizeSignal.dispatch(s -> s.onResize(width, height));
+        signal.dispatch(s -> s.onResize(width, height));
     }
 
     private void whenSignalIsDispatched() {

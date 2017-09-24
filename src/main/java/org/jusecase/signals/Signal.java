@@ -6,25 +6,30 @@ import java.util.function.Consumer;
 
 public class Signal<Listener> {
 
-    private final List<Listener> listeners;
-
-    public Signal() {
-        this.listeners = new CopyOnWriteArrayList<>();
-    }
+    private List<Listener> listeners;
 
     public void add(Listener listener) {
+        if (listeners == null) {
+            listeners = new CopyOnWriteArrayList<>();
+        }
         listeners.add(listener);
     }
 
     public void remove(Listener listener) {
-        listeners.remove(listener);
+        if (listeners != null) {
+            listeners.remove(listener);
+        }
     }
 
     public void removeAll() {
-        listeners.clear();
+        if (listeners != null) {
+            listeners.clear();
+        }
     }
 
     public void dispatch(Consumer<Listener> signal) {
-        listeners.forEach(signal);
+        if (listeners != null) {
+            listeners.forEach(signal);
+        }
     }
 }
