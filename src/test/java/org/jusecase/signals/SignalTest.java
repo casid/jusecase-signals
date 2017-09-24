@@ -99,31 +99,12 @@ public class SignalTest {
     }
 
     @Test
-    public void clone_sameAmountOfListeners() {
+    public void clone_listenerReferencesAreNotLeaked() {
         signal.add(listener);
         Signal<ResizeListener> clone = signal.clone();
 
         assertThat(signal.size()).isEqualTo(1);
-        assertThat(clone.size()).isEqualTo(1);
-    }
-
-    @Test
-    public void clone_noListeners() {
-        Signal<ResizeListener> clone = signal.clone();
-
-        assertThat(signal.size()).isEqualTo(0);
         assertThat(clone.size()).isEqualTo(0);
-    }
-
-    @Test
-    public void clone_modificationToCloneHasNoSideEffect() {
-        signal.add(listener);
-        Signal<ResizeListener> clone = signal.clone();
-        clone.remove(listener);
-
-        whenSignalIsDispatched();
-
-        assertThat(calledListeners).isEqualTo(1);
     }
 
     private void whenSignalIsDispatched(int width, int height) {

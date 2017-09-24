@@ -44,9 +44,7 @@ public class Signal<Listener> implements Cloneable {
     public Signal<Listener> clone() {
         try {
             Signal<Listener> clone = (Signal<Listener>) super.clone();
-            if (listeners != null) {
-                clone.listeners = new CopyOnWriteArrayList<>(listeners);
-            }
+            clone.listeners = null;
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
