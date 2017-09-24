@@ -1,5 +1,6 @@
 package org.jusecase.signals;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
@@ -10,9 +11,10 @@ public class Signal<Listener> {
 
     public void add(Listener listener) {
         if (listeners == null) {
-            listeners = new CopyOnWriteArrayList<>();
+            listeners = new CopyOnWriteArrayList<>(Collections.singletonList(listener));
+        } else {
+            listeners.add(listener);
         }
-        listeners.add(listener);
     }
 
     public void remove(Listener listener) {
