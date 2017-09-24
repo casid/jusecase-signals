@@ -2,91 +2,99 @@ package org.jusecase.signals;
 
 
 import org.junit.Test;
-import org.jusecase.signals.example.ResizeEvent;
-import org.jusecase.signals.example.ResizeSignal;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
+import org.jusecase.signals.example.ResizeListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class SignalTest {
 
-    ResizeSignal resizeSignal = new ResizeSignal();
+    Signal<ResizeListener> resizeSignal = new Signal<>();
 
-    List<ResizeEvent> caughtEvents = new ArrayList<>();
+    int calledListeners;
+    int width;
+    int height;
+
+    ResizeListener listener = (w, h) -> {
+        calledListeners++;
+        width = w;
+        height = h;
+    };
 
     @Test
     public void dispatch_noListeners() {
-        resizeSignal.dispatch(0, 0);
-        assertThat(caughtEvents).isEmpty();
+        whenSignalIsDispatched();
+        assertThat(calledListeners).isEqualTo(0);
     }
 
     @Test
     public void dispatch_listenerAddedAndRemoved() {
-        Consumer<ResizeEvent> listener = e -> caughtEvents.add(e);
         resizeSignal.add(listener);
         resizeSignal.remove(listener);
 
-        resizeSignal.dispatch(0, 0);
+        whenSignalIsDispatched();
 
-        assertThat(caughtEvents).isEmpty();
+        assertThat(calledListeners).isEqualTo(0);
     }
 
     @Test
     public void dispatch_listenerRemovedDuringDispatchAtEnd() {
-        Consumer<ResizeEvent> listener = e -> caughtEvents.add(e);
         resizeSignal.add(listener);
-        resizeSignal.add(e -> resizeSignal.remove(listener));
+        resizeSignal.add((w, h) -> resizeSignal.remove(listener));
 
-        resizeSignal.dispatch(0, 0);
+        whenSignalIsDispatched();
 
-        assertThat(caughtEvents).hasSize(1);
+        assertThat(calledListeners).isEqualTo(1);
     }
 
     @Test
     public void dispatch_listenerRemovedDuringDispatchAtBegin() {
-        Consumer<ResizeEvent> listener = e -> caughtEvents.add(e);
-        resizeSignal.add(e -> resizeSignal.remove(listener));
+        resizeSignal.add((w, h) -> resizeSignal.remove(listener));
         resizeSignal.add(listener);
 
-        resizeSignal.dispatch(0, 0);
+        whenSignalIsDispatched();
 
-        assertThat(caughtEvents).hasSize(1);
+        assertThat(calledListeners).isEqualTo(1);
     }
 
     @Test
     public void dispatch_oneListener() {
-        resizeSignal.add(e -> caughtEvents.add(e));
+        resizeSignal.add(listener);
 
-        resizeSignal.dispatch(800, 600);
+        whenSignalIsDispatched(800, 600);
 
-        assertThat(caughtEvents).hasSize(1);
-        assertThat(caughtEvents.get(0).width).isEqualTo(800);
-        assertThat(caughtEvents.get(0).height).isEqualTo(600);
+        assertThat(calledListeners).isEqualTo(1);
+        assertThat(width).isEqualTo(800);
+        assertThat(height).isEqualTo(600);
     }
 
     @Test
     public void dispatch_twoListeners() {
-        resizeSignal.add(e -> caughtEvents.add(e));
-        resizeSignal.add(e -> caughtEvents.add(e));
+        resizeSignal.add(listener);
+        resizeSignal.add(listener);
 
-        resizeSignal.dispatch(0 , 0);
+        whenSignalIsDispatched();
 
-        assertThat(caughtEvents).hasSize(2);
+        assertThat(calledListeners).isEqualTo(2);
     }
 
     @Test
     public void removeAll() {
-        resizeSignal.add(e -> caughtEvents.add(e));
-        resizeSignal.add(e -> caughtEvents.add(e));
-        resizeSignal.add(e -> caughtEvents.add(e));
+        resizeSignal.add(listener);
+        resizeSignal.add(listener);
+        resizeSignal.add(listener);
         resizeSignal.removeAll();
 
-        resizeSignal.dispatch(0, 0);
+        whenSignalIsDispatched();
 
-        assertThat(caughtEvents).isEmpty();
+        assertThat(calledListeners).isEqualTo(0);
+    }
+
+    private void whenSignalIsDispatched(int width, int height) {
+        resizeSignal.dispatch(s -> s.onResize(width, height));
+    }
+
+    private void whenSignalIsDispatched() {
+        whenSignalIsDispatched(0, 0);
     }
 }
