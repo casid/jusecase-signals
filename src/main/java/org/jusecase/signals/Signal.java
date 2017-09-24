@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
-public class Signal<Listener> {
+public class Signal<Listener> implements Cloneable {
 
     private List<Listener> listeners;
 
@@ -32,6 +32,24 @@ public class Signal<Listener> {
     public void dispatch(Consumer<Listener> signal) {
         if (listeners != null) {
             listeners.forEach(signal);
+        }
+    }
+
+    public int size() {
+        return listeners == null ? 0 : listeners.size();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Signal<Listener> clone() {
+        try {
+            Signal<Listener> clone = (Signal<Listener>) super.clone();
+            if (listeners != null) {
+                clone.listeners = new CopyOnWriteArrayList<>(listeners);
+            }
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException(e);
         }
     }
 }
