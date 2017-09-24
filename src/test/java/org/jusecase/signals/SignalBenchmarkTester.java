@@ -5,22 +5,21 @@ import org.jusecase.signals.example.ResizeSignal;
 
 public class SignalBenchmarkTester {
 
-    private final int prewarmIterations = 1000000;
-    private final int benchmarkIterations = 100000000;
+    private static final int prewarmIterations = 1000000;
+    private static final int benchmarkIterations = 100000000;
 
     private ResizeSignal resizeSignal;
 
 
     @Test
-    public void withoutPool() {
+    public void withDefaultPool() {
         resizeSignal = new ResizeSignal();
-        runBenchmark("without pool");
+        runBenchmark("default pool");
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void runBenchmark(String name) {
-        resizeSignal.add(e -> {
-            e.width = e.height * 2 + e.width;
-        });
+        resizeSignal.add(e -> e.width = e.height * 2 + e.width);
 
         System.out.println("Prewarming jvm");
         for (int i = 0; i < prewarmIterations; ++i) {
@@ -34,7 +33,7 @@ public class SignalBenchmarkTester {
         }
         long end = System.nanoTime();
         System.out.println("Benchmark '" + name + "' took " + ((end - start) / 1000000000.0) + "s");
-        System.out.println("Used Memory:" + ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024*1024)));
+        System.out.println("Used Memory:" + ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024)));
     }
 
     private void benchmark() {

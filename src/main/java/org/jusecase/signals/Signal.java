@@ -1,15 +1,26 @@
 package org.jusecase.signals;
 
+import net.jodah.typetools.TypeResolver;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 public abstract class Signal<Event> {
 
+    private final EventPool eventPool;
     private final List<Consumer<Event>> listeners;
+    private final Class<Event> eventClass;
 
     public Signal() {
-        listeners = new CopyOnWriteArrayList<>();
+        this(EventPool.DEFAULT);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Signal(EventPool eventPool) {
+        this.eventPool = eventPool;
+        this.listeners = new CopyOnWriteArrayList<>();
+        this.eventClass = (Class<Event>) TypeResolver.resolveRawArguments(Signal.class, getClass())[0];
     }
 
     public void add(Consumer<Event> listener) {
@@ -30,11 +41,23 @@ public abstract class Signal<Event> {
 
     protected void dispatch(Consumer<Event> eventSetup) {
         if (!listeners.isEmpty()) {
-            Event event = createEvent();
+            Event event = eventPool.getUnusedEvent(eventClass);
+            if (event == null) {
+                event = createEvent();
+            }
             eventSetup.accept(event);
+
             dispatch(event);
+
+            eventPool.addUnusedEvent(eventClass, event);
         }
     }
 
-    protected abstract Event createEvent();
+    protected Event createEvent() {
+        try {
+            return eventClass.newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create event instance. You probably need to override createEvent() in your signal subclass.");
+        }
+    }
 }

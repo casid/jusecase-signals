@@ -10,9 +10,4 @@ public class ResizeSignal extends Signal<ResizeEvent> {
             e.height = height;
         });
     }
-
-    @Override
-    protected ResizeEvent createEvent() {
-        return new ResizeEvent();
-    }
 }
