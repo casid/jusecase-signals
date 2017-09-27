@@ -1,6 +1,6 @@
 package org.jusecase.signals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.jusecase.signals.example.ResizeListener;
 
 public class SignalBenchmarkTester {
