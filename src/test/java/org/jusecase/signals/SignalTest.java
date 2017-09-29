@@ -1,13 +1,14 @@
 package org.jusecase.signals;
 
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.jusecase.signals.example.ResizeListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class SignalTest {
+class SignalTest {
 
     Signal<ResizeListener> signal = new Signal<>();
 
@@ -22,13 +23,13 @@ public class SignalTest {
     };
 
     @Test
-    public void dispatch_noListeners() {
+    void dispatch_noListeners() {
         whenSignalIsDispatched();
         assertThat(calledListeners).isEqualTo(0);
     }
 
     @Test
-    public void dispatch_listenerAddedAndRemoved() {
+    void dispatch_listenerAddedAndRemoved() {
         signal.add(listener);
         signal.remove(listener);
 
@@ -38,7 +39,7 @@ public class SignalTest {
     }
 
     @Test
-    public void dispatch_listenerRemovedDuringDispatchAtEnd() {
+    void dispatch_listenerRemovedDuringDispatchAtEnd() {
         signal.add(listener);
         signal.add((w, h) -> signal.remove(listener));
 
@@ -48,7 +49,7 @@ public class SignalTest {
     }
 
     @Test
-    public void dispatch_listenerRemovedDuringDispatchAtBegin() {
+    void dispatch_listenerRemovedDuringDispatchAtBegin() {
         signal.add((w, h) -> signal.remove(listener));
         signal.add(listener);
 
@@ -58,7 +59,7 @@ public class SignalTest {
     }
 
     @Test
-    public void dispatch_oneListener() {
+    void dispatch_oneListener() {
         signal.add(listener);
 
         whenSignalIsDispatched(800, 600);
@@ -69,7 +70,7 @@ public class SignalTest {
     }
 
     @Test
-    public void dispatch_twoListeners() {
+    void dispatch_twoListeners() {
         signal.add(listener);
         signal.add(listener);
 
@@ -79,7 +80,7 @@ public class SignalTest {
     }
 
     @Test
-    public void removeAll() {
+    void removeAll() {
         signal.add(listener);
         signal.add(listener);
         signal.add(listener);
@@ -91,7 +92,7 @@ public class SignalTest {
     }
 
     @Test
-    public void nullListeners_doNotCauseException() {
+    void nullListeners_doNotCauseException() {
         signal.removeAll();
         signal.remove(listener);
 
@@ -99,7 +100,7 @@ public class SignalTest {
     }
 
     @Test
-    public void clone_listenerReferencesAreNotLeaked() {
+    void clone_listenerReferencesAreNotLeaked() {
         signal.add(listener);
         Signal<ResizeListener> clone = signal.clone();
 
@@ -107,11 +108,23 @@ public class SignalTest {
         assertThat(clone.size()).isEqualTo(0);
     }
 
-    private void whenSignalIsDispatched(int width, int height) {
+    @Disabled // Oh no!
+    @Test
+    void removeMethodReference() {
+        signal.add(this::onResizeMethodReference);
+        signal.remove(this::onResizeMethodReference);
+        assertThat(signal.size()).isEqualTo(0);
+    }
+
+    void whenSignalIsDispatched(int width, int height) {
         signal.dispatch(s -> s.onResize(width, height));
     }
 
-    private void whenSignalIsDispatched() {
+    void whenSignalIsDispatched() {
         whenSignalIsDispatched(0, 0);
+    }
+
+    @SuppressWarnings("unused")
+    void onResizeMethodReference(int w, int h) {
     }
 }
