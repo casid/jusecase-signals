@@ -35,6 +35,13 @@ public class Signal<Listener> implements Cloneable {
         }
     }
 
+    public Iterable<Listener> getListeners() {
+        if (listeners != null) {
+            return listeners;
+        }
+        return Collections.emptyList();
+    }
+
     public int size() {
         return listeners == null ? 0 : listeners.size();
     }
