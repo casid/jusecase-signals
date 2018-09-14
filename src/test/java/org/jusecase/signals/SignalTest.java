@@ -55,7 +55,7 @@ class SignalTest {
 
         whenSignalIsDispatched();
 
-        assertThat(calledListeners).isEqualTo(1);
+        assertThat(calledListeners).isEqualTo(0);
     }
 
     @Test
@@ -77,6 +77,17 @@ class SignalTest {
         whenSignalIsDispatched();
 
         assertThat(calledListeners).isEqualTo(2);
+    }
+
+    @Test
+    void dispatch_manyListeners() {
+        for (int i = 0; i < 10; ++i) {
+            signal.add(listener);
+        }
+
+        whenSignalIsDispatched();
+
+        assertThat(calledListeners).isEqualTo(10);
     }
 
     @Test
