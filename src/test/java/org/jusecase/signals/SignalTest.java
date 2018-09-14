@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SignalTest {
 
-    Signal<ResizeListener> signal = new Signal<>();
+    Signal<ResizeListener> signal = new Signal<>(ResizeListener.class);
 
     int calledListeners;
     int width;

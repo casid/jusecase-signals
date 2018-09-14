@@ -15,7 +15,7 @@ public class SignalBenchmarkTester {
 
     @Test
     public void withDefaultPool() {
-        resizeSignal = new Signal<>();
+        resizeSignal = new Signal<>(ResizeListener.class);
         runBenchmark("default pool");
     }
 

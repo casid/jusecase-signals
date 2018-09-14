@@ -1,5 +1,6 @@
 package org.jusecase.signals;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -11,13 +12,21 @@ public class Signal<Listener> implements Cloneable {
     private static final int INITIAL_CAPACITY = 4;
     private static final int LOAD_FACTOR = 2;
 
-    private Listener[] listeners;
-    private int size;
+    // These are protected for dispatch utility methods in subclasses without lambda generation
+    protected Listener[] listeners;
+    protected int size;
+
+    private final Class<Listener> listenerClass;
+
+
+    public Signal(Class<Listener> listenerClass) {
+        this.listenerClass = listenerClass;
+    }
 
     public void add(Listener listener) {
         if (listeners == null) {
             //noinspection unchecked
-            listeners = (Listener[]) new Object[INITIAL_CAPACITY];
+            listeners = (Listener[]) Array.newInstance(listenerClass, INITIAL_CAPACITY);
         } else if (size + 1 > listeners.length) {
             listeners = Arrays.copyOf(listeners, size * LOAD_FACTOR);
         }
@@ -27,7 +36,7 @@ public class Signal<Listener> implements Cloneable {
     public void remove(Listener listener) {
         if (listeners != null) {
             for (int i = 0; i < size; ++i) {
-                if (listeners[i] == listener) {
+                if (listener.equals(listeners[i])) {
                     remove(i);
                     break;
                 }
@@ -43,22 +52,13 @@ public class Signal<Listener> implements Cloneable {
     }
 
     public void dispatch(Consumer<Listener> signal) {
-        if (listeners != null) {
-            for (int i = 0; i < size; ++i) {
-                signal.accept(listeners[i]);
-            }
+        for (int i = 0; i < size; ++i) {
+            signal.accept(listeners[i]);
         }
     }
 
     public int size() {
         return size;
-    }
-
-    /**
-     * For memory efficient dispatch utilities in subclasses
-     */
-    protected Listener[] getListeners() {
-        return listeners;
     }
 
     @SuppressWarnings("unchecked")
