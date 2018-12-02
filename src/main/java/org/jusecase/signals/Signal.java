@@ -2,12 +2,9 @@ package org.jusecase.signals;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
-public class Signal<Listener> implements Cloneable {
+public class Signal<Listener> {
 
     private static final int INITIAL_CAPACITY = 4;
     private static final int LOAD_FACTOR = 2;
@@ -59,19 +56,6 @@ public class Signal<Listener> implements Cloneable {
 
     public int size() {
         return size;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Signal<Listener> clone() {
-        try {
-            Signal<Listener> clone = (Signal<Listener>) super.clone();
-            clone.listeners = null;
-            clone.size = 0;
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private void remove(int index) {

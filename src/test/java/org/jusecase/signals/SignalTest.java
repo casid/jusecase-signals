@@ -110,15 +110,6 @@ class SignalTest {
         whenSignalIsDispatched();
     }
 
-    @Test
-    void clone_listenerReferencesAreNotLeaked() {
-        signal.add(listener);
-        Signal<ResizeListener> clone = signal.clone();
-
-        assertThat(signal.size()).isEqualTo(1);
-        assertThat(clone.size()).isEqualTo(0);
-    }
-
     @Disabled // Oh no!
     @Test
     void removeMethodReference() {
