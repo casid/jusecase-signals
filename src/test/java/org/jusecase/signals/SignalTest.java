@@ -6,6 +6,7 @@ import org.jusecase.signals.example.Resize;
 import org.jusecase.signals.example.ResizeListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 
 class SignalTest {
@@ -118,6 +119,16 @@ class SignalTest {
     }
 
     @Test
+    void remove_addedTwice() {
+        signal.add(listener);
+        signal.add(listener);
+
+        signal.remove(listener);
+
+        assertThat(signal.size()).isEqualTo(0);
+    }
+
+    @Test
     void resizeWhileIterating() {
         class RemoveMyselfListener implements ResizeListener {
 
@@ -134,6 +145,22 @@ class SignalTest {
         whenSignalIsDispatched();
 
         assertThat(signal.size()).isEqualTo(0);
+    }
+
+    @Test
+    void nestedDispatch_notSupported() {
+        class DispatchAgainListener implements ResizeListener {
+
+            @Override
+            public void onResize(int width, int height) {
+                signal.dispatch(width, height);
+            }
+        }
+        signal.add(new DispatchAgainListener());
+
+        Throwable throwable = catchThrowable(this::whenSignalIsDispatched);
+
+        assertThat(throwable).isInstanceOf(IllegalStateException.class);
     }
 
     void whenSignalIsDispatched(int width, int height) {

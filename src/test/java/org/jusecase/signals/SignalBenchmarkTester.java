@@ -17,7 +17,7 @@ public class SignalBenchmarkTester implements ResizeListener {
     @Test
     public void withDefaultPool() {
         resizeSignal = new Resize();
-        runBenchmark("default pool");
+        runBenchmark("default");
     }
 
     @SuppressWarnings("SameParameterValue")
