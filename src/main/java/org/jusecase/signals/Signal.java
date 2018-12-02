@@ -15,6 +15,8 @@ public class Signal<Listener> implements Iterable<Listener>, Iterator<Listener> 
     private Object[] listeners;
     private int size;
     private int next = -1;
+    private int[] nestedNext;
+    private int nestedCount;
     private int removed;
 
 
@@ -83,10 +85,7 @@ public class Signal<Listener> implements Iterable<Listener>, Iterator<Listener> 
 
     @Override
     public final Iterator<Listener> iterator() {
-        if (isIterating()) {
-            throw new IllegalStateException("Nested signal dispatch is not supported");
-        }
-        next = 0;
+        pushIteration();
         return this;
     }
 
@@ -99,10 +98,30 @@ public class Signal<Listener> implements Iterable<Listener>, Iterator<Listener> 
                 }
             }
 
+            popIteration();
+        }
+        return false;
+    }
+
+    private void pushIteration() {
+        if (isIterating()) {
+            if (nestedNext == null) {
+                nestedNext = new int[2];
+            } else if (nestedCount + 1 > nestedNext.length) {
+                nestedNext = Arrays.copyOf(nestedNext, nestedCount * LOAD_FACTOR);
+            }
+            nestedNext[nestedCount++] = next;
+        }
+        next = 0;
+    }
+
+    private void popIteration() {
+        if (nestedCount > 0) {
+            next = nestedNext[--nestedCount];
+        } else {
             cleanup();
             next = -1;
         }
-        return false;
     }
 
     @SuppressWarnings("unchecked")
