@@ -1,8 +1,8 @@
 package org.jusecase.signals;
 
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.jusecase.signals.example.Resize;
 import org.jusecase.signals.example.ResizeListener;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SignalTest {
 
-    Signal<ResizeListener> signal = new Signal<>(ResizeListener.class);
+    Resize signal = new Resize();
 
     int calledListeners;
     int width;
@@ -110,16 +110,34 @@ class SignalTest {
         whenSignalIsDispatched();
     }
 
-    @Disabled // Oh no!
     @Test
     void removeMethodReference() {
         signal.add(this::onResizeMethodReference);
         signal.remove(this::onResizeMethodReference);
+        assertThat(signal.size()).isEqualTo(1); // yes, method references are dangerous to use!
+    }
+
+    @Test
+    void resizeWhileIterating() {
+        class RemoveMyselfListener implements ResizeListener {
+
+            @Override
+            public void onResize(int width, int height) {
+                signal.remove(this);
+            }
+        }
+
+        signal.add(new RemoveMyselfListener());
+        signal.add(new RemoveMyselfListener());
+        signal.add(new RemoveMyselfListener());
+
+        whenSignalIsDispatched();
+
         assertThat(signal.size()).isEqualTo(0);
     }
 
     void whenSignalIsDispatched(int width, int height) {
-        signal.dispatch(s -> s.onResize(width, height));
+        signal.dispatch(width, height);
     }
 
     void whenSignalIsDispatched() {

@@ -1,30 +1,28 @@
 package org.jusecase.signals;
 
 import org.junit.jupiter.api.Test;
+import org.jusecase.signals.example.Resize;
 import org.jusecase.signals.example.ResizeListener;
 
-public class SignalBenchmarkTester {
+public class SignalBenchmarkTester implements ResizeListener {
 
     private static final int prewarmIterations = 1000000;
     private static final int benchmarkIterations = 100000000;
 
-    private Signal<ResizeListener> resizeSignal;
+    private Resize resizeSignal;
 
     private int totalWidth;
     private int totalHeight;
 
     @Test
     public void withDefaultPool() {
-        resizeSignal = new Signal<>(ResizeListener.class);
+        resizeSignal = new Resize();
         runBenchmark("default pool");
     }
 
     @SuppressWarnings("SameParameterValue")
     private void runBenchmark(String name) {
-        resizeSignal.add((w, h) -> {
-            totalWidth += w;
-            totalHeight += h;
-        });
+        resizeSignal.add(this);
 
         System.out.println("Prewarming jvm");
         for (int i = 0; i < prewarmIterations; ++i) {
@@ -43,6 +41,12 @@ public class SignalBenchmarkTester {
     }
 
     private void benchmark() {
-        resizeSignal.dispatch(l -> l.onResize(1024, 768));
+        resizeSignal.dispatch(1024, 768);
+    }
+
+    @Override
+    public void onResize(int width, int height) {
+        totalWidth += width;
+        totalHeight += height;
     }
 }
