@@ -128,6 +128,36 @@ class SignalTest {
     }
 
     @Test
+    void addFirst_two() {
+        StringBuilder result = new StringBuilder();
+        ResizeListener one = (width, height) -> result.append("one");
+        ResizeListener two = (width, height) -> result.append("two");
+
+        signal.add(one);
+        signal.addFirst(two);
+
+        whenSignalIsDispatched();
+
+        assertThat(result.toString()).isEqualTo("twoone");
+    }
+
+    @Test
+    void addFirst_three() {
+        StringBuilder result = new StringBuilder();
+        ResizeListener one = (width, height) -> result.append("one");
+        ResizeListener two = (width, height) -> result.append("two");
+        ResizeListener three = (width, height) -> result.append("three");
+
+        signal.addFirst(one);
+        signal.addFirst(two);
+        signal.addFirst(three);
+
+        whenSignalIsDispatched();
+
+        assertThat(result.toString()).isEqualTo("threetwoone");
+    }
+
+    @Test
     void resizeWhileIterating() {
         class RemoveMyselfListener implements ResizeListener {
 

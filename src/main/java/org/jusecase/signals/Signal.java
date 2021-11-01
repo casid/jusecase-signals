@@ -29,6 +29,22 @@ public class Signal<Listener> implements Iterable<Listener>, Iterator<Listener> 
         listeners[size++] = listener;
     }
 
+    @SuppressWarnings("unchecked")
+    public final void addFirst(Listener listener) {
+        if (listeners == null) {
+            add(listener);
+        } else {
+            Object[] oldListeners = listeners;
+            listeners = null;
+            size = 0;
+
+            add(listener);
+            for (Object oldListener : oldListeners) {
+                add((Listener)oldListener);
+            }
+        }
+    }
+
     public final void remove(Listener listener) {
         if (listeners != null) {
             for (int i = 0; i < size; ++i) {
