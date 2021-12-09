@@ -35,12 +35,20 @@ public class Signal<Listener> implements Iterable<Listener>, Iterator<Listener> 
             add(listener);
         } else {
             Object[] oldListeners = listeners;
+            int oldSize = size;
+
             listeners = null;
             size = 0;
 
             add(listener);
-            for (Object oldListener : oldListeners) {
-                add((Listener)oldListener);
+            for (int i = 0; i < oldSize; ++i) {
+                add((Listener)oldListeners[i]);
+            }
+
+            if (nestedNext != null) {
+                for (int i = 0; i < nestedNext.length; ++i) {
+                    ++nestedNext[i];
+                }
             }
         }
     }
